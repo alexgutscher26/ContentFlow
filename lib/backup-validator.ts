@@ -7,7 +7,12 @@ const execPromise = promisify(exec);
 
 class BackupValidator {
   /**
-   * Validate a backup file
+   * Validate a backup file.
+   *
+   * This function checks if the specified backup file exists and is not empty. It then executes a validation script to ensure the backup file is valid. If any errors occur during the process, appropriate details are returned. The function handles both file system checks and script execution, providing detailed feedback on the validation status.
+   *
+   * @param backupFilePath - The path to the backup file to be validated.
+   * @returns An object containing a validity flag and details about the validation process.
    */
   async validateBackupFile(backupFilePath: string): Promise<{ valid: boolean; details: string }> {
     try {
@@ -43,7 +48,14 @@ class BackupValidator {
   }
 
   /**
-   * Test restore from backup in a temporary database
+   * Test restore from backup in a temporary database.
+   *
+   * This function attempts to restore a backup from the specified backupFilePath by executing a shell script.
+   * It logs the output and any errors encountered during the process. If the script produces any standard error output,
+   * it returns a failure response with the error details. In case of an exception, it catches the error and returns
+   * a failure response with the error message.
+   *
+   * @param {string} backupFilePath - The path to the backup file to be tested for restoration.
    */
   async testRestore(backupFilePath: string): Promise<{ success: boolean; details: string }> {
     try {
@@ -69,7 +81,13 @@ class BackupValidator {
   }
 
   /**
-   * Perform comprehensive backup validation
+   * Perform comprehensive backup validation.
+   *
+   * This function validates a backup file by first checking the file's integrity using the validateBackupFile method.
+   * If the file is valid, it proceeds to test the restore process with the testRestore method.
+   * The function returns an object indicating whether the validation was successful and provides details on the validation outcome.
+   *
+   * @param backupFilePath - The path to the backup file that needs to be validated.
    */
   async comprehensiveValidation(backupFilePath: string): Promise<{ valid: boolean; details: string }> {
     // First validate the file itself
