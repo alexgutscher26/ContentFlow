@@ -1,0 +1,53 @@
+{
+  "backup": {
+    "strategies": {
+      "full": {
+        "frequency": "daily",
+        "time": "02:00",
+        "retentionDays": 30
+      },
+      "incremental": {
+        "frequency": "6hours",
+        "retentionDays": 7
+      },
+      "transactionLog": {
+        "frequency": "15minutes",
+        "retentionDays": 1
+      }
+    },
+    "storage": {
+      "local": {
+        "enabled": true,
+        "path": "/backups"
+      },
+      "cloud": {
+        "aws": {
+          "enabled": false,
+          "bucket": "contentflow-backups",
+          "region": "us-east-1"
+        },
+        "gcp": {
+          "enabled": false,
+          "bucket": "contentflow-backups"
+        }
+      }
+    },
+    "encryption": {
+      "atRest": true,
+      "inTransit": true,
+      "algorithm": "AES-256"
+    }
+  },
+  "restore": {
+    "validation": {
+      "enabled": true,
+      "tablesToCheck": [
+        "users",
+        "organizations",
+        "posts",
+        "drafts",
+        "analytics"
+      ]
+    }
+  }
+}

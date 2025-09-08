@@ -6,7 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "backup:full": "bash scripts/backup-database.sh full",
+    "backup:incremental": "bash scripts/backup-database.sh incremental",
+    "backup:transaction-log": "bash scripts/backup-database.sh transaction-log",
+    "backup:validate": "bash scripts/validate-backup.sh",
+    "migration:validate": "bash scripts/validate-migration.sh",
+    "migration:status": "npx prisma migrate status",
+    "migration:apply": "npx prisma migrate deploy",
+    "migration:create": "npx prisma migrate dev --name",
+    "monitor:backup": "bash scripts/monitor-backup.sh",
+    "monitor:migration": "bash scripts/monitor-migration.sh"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
