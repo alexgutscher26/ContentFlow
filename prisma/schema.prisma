@@ -1,0 +1,196 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id                   String     @id @default(cuid())
+  email                String     @unique
+  firstName            String
+  lastName             String
+  organizationId       String?
+  linkedinToken        String?
+  linkedinProfile      Json?
+  subscriptionTier     String     @default("starter")
+  industry             String?
+  jobTitle             String?
+  bio                  String?
+  timezone             String     @default("America/New_York")
+  profileImage         String?
+  onboardingCompleted  Boolean    @default(false)
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+  organization         Organization? @relation(fields: [organizationId], references: [id])
+  posts                Post[]
+  teamMemberships      TeamMember[]
+  drafts               Draft[]
+  comments             Comment[]
+  notifications        Notification[]
+  userSettings         UserSetting?
+  invitedTeamMembers   TeamMember[] @relation("TeamMemberInvitedBy")
+  approvedDrafts       Draft[]      @relation("DraftApprovedBy")
+  resolvedComments     Comment[]    @relation("CommentResolvedBy")
+}
+
+// Organization model
+model Organization {
+  id              String        @id @default(cuid())
+  name            String
+  slug            String        @unique
+  subscriptionId  String?
+  stripeCustomerId String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  users           User[]
+  posts           Post[]
+  subscriptions   Subscription[]
+  teamMembers     TeamMember[]
+  drafts          Draft[]
+}
+
+// Post model
+model Post {
+  id              String      @id @default(cuid())
+  userId          String
+  organizationId  String
+  content         String
+  tone            String
+  industry        String
+  status          String      @default("draft")
+  scheduledFor    DateTime?
+  publishedAt     DateTime?
+  linkedinPostId  String?
+  templateId      String?
+  aiGenerated     Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  user            User        @relation(fields: [userId], references: [id])
+  organization    Organization @relation(fields: [organizationId], references: [id])
+  analytics       Analytics[]
+  drafts          Draft[]
+}
+
+// Subscription model
+model Subscription {
+  id                   String      @id @default(cuid())
+  organizationId       String
+  stripeSubscriptionId String?     @unique
+  tier                 String      @default("starter")
+  status               String      @default("active")
+  currentPeriodStart   DateTime?
+  currentPeriodEnd     DateTime?
+  aiCreditsUsed        Int         @default(0)
+  aiCreditsLimit       Int         @default(5)
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  organization         Organization @relation(fields: [organizationId], references: [id])
+}
+
+// Analytics model
+model Analytics {
+  id               String    @id @default(cuid())
+  postId           String
+  linkedinPostId   String
+  impressions      Int       @default(0)
+  likes            Int       @default(0)
+  comments         Int       @default(0)
+  shares           Int       @default(0)
+  clickThroughRate Decimal?  @db.Decimal(5, 2)
+  recordedAt       DateTime  @default(now())
+  post             Post      @relation(fields: [postId], references: [id])
+}
+
+// TeamMember model
+model TeamMember {
+  id           String      @id @default(cuid())
+  userId       String
+  organizationId String
+  role         String      @default("viewer")
+  invitedBy    String?
+  invitedAt    DateTime    @default(now())
+  status       String      @default("pending")
+  permissions  Json?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  user         User        @relation(fields: [userId], references: [id])
+  organization Organization @relation(fields: [organizationId], references: [id])
+  invitedByUser User?       @relation("TeamMemberInvitedBy", fields: [invitedBy], references: [id])
+}
+
+// Draft model
+model Draft {
+  id          String      @id @default(cuid())
+  postId      String?
+  content     String
+  version     Int         @default(1)
+  createdBy   String
+  status      String      @default("draft")
+  collaborators Json?
+  approvers   Json?
+  approvedBy  String?
+  approvedAt  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  post        Post?       @relation(fields: [postId], references: [id])
+  creator     User        @relation(fields: [createdBy], references: [id])
+  approvedByUser User?     @relation("DraftApprovedBy", fields: [approvedBy], references: [id])
+  comments    Comment[]
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  organizationId String?
+}
+
+// Comment model
+model Comment {
+  id          String      @id @default(cuid())
+  draftId     String
+  userId      String
+  content     String
+  type        String      @default("comment")
+  position    Json?
+  resolved    Boolean     @default(false)
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  draft       Draft       @relation(fields: [draftId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+  resolvedByUser User?    @relation("CommentResolvedBy", fields: [resolvedBy], references: [id])
+}
+
+// Notification model
+model Notification {
+  id          String      @id @default(cuid())
+  userId      String
+  type        String
+  title       String
+  message     String
+  relatedId   String?
+  read        Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  user        User        @relation(fields: [userId], references: [id])
+}
+
+// UserSetting model
+model UserSetting {
+  id                String      @id @default(cuid())
+  userId            String      @unique
+  emailNotifications Boolean     @default(true)
+  postReminders     Boolean     @default(true)
+  analyticsReports  Boolean     @default(true)
+  teamUpdates       Boolean     @default(true)
+  marketingEmails   Boolean     @default(false)
+  profileVisibility String      @default("team")
+  dataSharing       Boolean     @default(false)
+  analyticsTracking Boolean     @default(true)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  user              User        @relation(fields: [userId], references: [id])
+}
