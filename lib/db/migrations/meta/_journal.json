@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1757297857548,
+      "tag": "0000_confused_fixer",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1757297901446,
+      "tag": "0001_add_indexes_and_constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1757297974243,
+      "tag": "0002_add_team_member_unique_constraint",
+      "breakpoints": true
+    }
+  ]
+}

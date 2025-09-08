@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, integer, boolean, uuid, jsonb, decimal, sql } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, boolean, uuid, jsonb, decimal, index, uniqueIndex } from 'drizzle-orm/pg-core';
 import { createId } from '@paralleldrive/cuid2';
 
 // Users table
@@ -17,8 +17,8 @@ export const users = pgTable('users', {
   timezone: text('timezone').default('America/New_York'),
   profileImage: text('profile_image'),
   onboardingCompleted: boolean('onboarding_completed').default(false),
-  createdAt: timestamp('created_at').default(sql`now()`).notNull(),
-  updatedAt: timestamp('updated_at').default(sql`now()`).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // Organizations table
@@ -28,8 +28,8 @@ export const organizations = pgTable('organizations', {
   slug: text('slug').notNull().unique(),
   subscriptionId: text('subscription_id'),
   stripeCustomerId: text('stripe_customer_id'),
-  createdAt: timestamp('created_at').default(sql`now()`).notNull(),
-  updatedAt: timestamp('updated_at').default(sql`now()`).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // Posts table
@@ -46,8 +46,48 @@ export const posts = pgTable('posts', {
   linkedinPostId: text('linkedin_post_id'),
   templateId: text('template_id'),
   aiGenerated: boolean('ai_generated').default(false),
-  createdAt: timestamp('created_at').default(sql`now()`).notNull(),
-  updatedAt: timestamp('updated_at').default(sql`now()`).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    statusScheduledForIdx: index('posts_status_scheduled_for_idx').on(table.status, table.scheduledFor),
+  }
+});
+
+// Analytics table
+export const analytics = pgTable('analytics', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  postId: text('post_id').references(() => posts.id).notNull(),
+  linkedinPostId: text('linkedin_post_id').notNull(),
+  impressions: integer('impressions').default(0),
+  likes: integer('likes').default(0),
+  comments: integer('comments').default(0),
+  shares: integer('shares').default(0),
+  clickThroughRate: decimal('click_through_rate', { precision: 5, scale: 2 }),
+  recordedAt: timestamp('recorded_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    recordedAtIdx: index('analytics_recorded_at_idx').on(table.recordedAt),
+  }
+});
+
+// Team Members table
+export const teamMembers = pgTable('team_members', {
+  id: text('id').primaryKey().$defaultFn(() => createId()),
+  userId: text('user_id').references(() => users.id).notNull(),
+  organizationId: text('organization_id').references(() => organizations.id).notNull(),
+  role: text('role').notNull().default('viewer'),
+  invitedBy: text('invited_by').references(() => users.id),
+  invitedAt: timestamp('invited_at').defaultNow().notNull(),
+  status: text('status').notNull().default('pending'),
+  permissions: jsonb('permissions'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => {
+  return {
+    statusIdx: index('team_members_status_idx').on(table.status),
+    userIdOrganizationIdUnique: uniqueIndex('team_members_user_id_organization_id_unique').on(table.userId, table.organizationId), // Add composite unique constraint
+  }
 });
 
 // Subscriptions table
@@ -61,35 +101,8 @@ export const subscriptions = pgTable('subscriptions', {
   currentPeriodEnd: timestamp('current_period_end'),
   aiCreditsUsed: integer('ai_credits_used').default(0),
   aiCreditsLimit: integer('ai_credits_limit').default(5),
-  createdAt: timestamp('created_at').default(sql`now()`).notNull(),
-  updatedAt: timestamp('updated_at').default(sql`now()`).notNull(),
-});
-
-// Analytics table
-export const analytics = pgTable('analytics', {
-  id: text('id').primaryKey().$defaultFn(() => createId()),
-  postId: text('post_id').references(() => posts.id).notNull(),
-  linkedinPostId: text('linkedin_post_id').notNull(),
-  impressions: integer('impressions').default(0),
-  likes: integer('likes').default(0),
-  comments: integer('comments').default(0),
-  shares: integer('shares').default(0),
-  clickThroughRate: decimal('click_through_rate', { precision: 5, scale: 2 }),
-  recordedAt: timestamp('recorded_at').default(sql`now()`).notNull(),
-});
-
-// Team Members table
-export const teamMembers = pgTable('team_members', {
-  id: text('id').primaryKey().$defaultFn(() => createId()),
-  userId: text('user_id').references(() => users.id).notNull(),
-  organizationId: text('organization_id').references(() => organizations.id).notNull(),
-  role: text('role').notNull().default('viewer'),
-  invitedBy: text('invited_by').references(() => users.id),
-  invitedAt: timestamp('invited_at').default(sql`now()`).notNull(),
-  status: text('status').notNull().default('pending'),
-  permissions: jsonb('permissions'),
-  createdAt: timestamp('created_at').default(sql`now()`).notNull(),
-  updatedAt: timestamp('updated_at').default(sql`now()`).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // Drafts table
@@ -104,8 +117,13 @@ export const drafts = pgTable('drafts', {
   approvers: jsonb('approvers'),
   approvedBy: text('approved_by').references(() => users.id),
   approvedAt: timestamp('approved_at'),
-  createdAt: timestamp('created_at').default(sql`now()`).notNull(),
-  updatedAt: timestamp('updated_at').default(sql`now()`).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  organizationId: text('organization_id').references(() => organizations.id), // Add this missing field
+}, (table) => {
+  return {
+    statusIdx: index('drafts_status_idx').on(table.status),
+  }
 });
 
 // Comments table
@@ -119,8 +137,8 @@ export const comments = pgTable('comments', {
   resolved: boolean('resolved').default(false),
   resolvedBy: text('resolved_by').references(() => users.id),
   resolvedAt: timestamp('resolved_at'),
-  createdAt: timestamp('created_at').default(sql`now()`).notNull(),
-  updatedAt: timestamp('updated_at').default(sql`now()`).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
 // Notifications table
@@ -132,7 +150,7 @@ export const notifications = pgTable('notifications', {
   message: text('message').notNull(),
   relatedId: text('related_id'),
   read: boolean('read').default(false),
-  createdAt: timestamp('created_at').default(sql`now()`).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
 // User Settings table
@@ -147,6 +165,6 @@ export const userSettings = pgTable('user_settings', {
   profileVisibility: text('profile_visibility').default('team'),
   dataSharing: boolean('data_sharing').default(false),
   analyticsTracking: boolean('analytics_tracking').default(true),
-  createdAt: timestamp('created_at').default(sql`now()`).notNull(),
-  updatedAt: timestamp('updated_at').default(sql`now()`).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
