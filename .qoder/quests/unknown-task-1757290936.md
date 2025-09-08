@@ -13,6 +13,52 @@ The enhanced seeding script will follow a modular approach where each entity typ
 3. Establish proper relationships between entities
 4. Provide informative console output during the seeding process
 
+### Script Structure
+
+The enhanced seeding script will be organized as follows:
+
+```javascript
+// Main seeding function
+async function main() {
+  try {
+    // Initialize Prisma client
+    const prisma = new PrismaClient();
+    
+    // Execute seeding functions in order
+    await seedOrganizations(prisma);
+    await seedUsers(prisma);
+    await seedSubscriptions(prisma);
+    await seedPosts(prisma);
+    await seedAnalytics(prisma);
+    await seedTeamMembers(prisma);
+    await seedDrafts(prisma);
+    await seedComments(prisma);
+    await seedNotifications(prisma);
+    await seedUserSettings(prisma);
+    
+    console.log("Seeding completed successfully!");
+  } catch (error) {
+    console.error("Seeding failed:", error);
+    process.exit(1);
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+// Individual seeding functions
+async function seedOrganizations(prisma) { /* ... */ }
+async function seedUsers(prisma) { /* ... */ }
+async function seedSubscriptions(prisma) { /* ... */ }
+// ... additional functions
+```
+
+Each seeding function will:
+1. Check for existing data to prevent duplication
+2. Generate appropriate sample data
+3. Create entities with proper relationships
+4. Handle errors gracefully
+5. Provide console feedback
+
 ## Data Models & Relationships
 
 Based on the Prisma schema, the following entities need to be seeded with sample data:
@@ -31,7 +77,7 @@ Based on the Prisma schema, the following entities need to be seeded with sample
 ## Seeding Logic Design
 
 ### 1. Organization Seeding
-```javascript
+```
 // Enhanced organization creation with more realistic sample data
 const organizations = [
   {
@@ -50,7 +96,7 @@ const organizations = [
 ```
 
 ### 2. User Seeding
-```javascript
+```
 // Enhanced user creation with more diverse sample data
 const users = [
   {
@@ -77,7 +123,7 @@ const users = [
 ```
 
 ### 3. Subscription Seeding
-```javascript
+```
 // Sample subscriptions for different tiers
 const subscriptions = [
   {
@@ -102,7 +148,7 @@ const subscriptions = [
 ```
 
 ### 4. Post Seeding
-```javascript
+```
 // Sample posts with different statuses and content
 const posts = [
   {
@@ -123,7 +169,7 @@ const posts = [
 ```
 
 ### 5. Analytics Seeding
-```javascript
+```
 // Sample analytics data for posts
 const analytics = [
   {
@@ -144,7 +190,7 @@ const analytics = [
 ```
 
 ### 6. Team Member Seeding
-```javascript
+```
 // Sample team members with different roles
 const teamMembers = [
   {
@@ -156,161 +202,167 @@ const teamMembers = [
     status: 'active'
   },
   {
+    role: 'viewer',
+    status: 'pending'
+  }
+];
+```
+
+### 7. Draft Seeding
+```
+// Sample drafts with different statuses
+const drafts = [
+  {
+    content: 'Draft content for review. Please provide feedback on tone and messaging.',
+    status: 'draft',
+    version: 1
+  },
+  {
+    content: 'Final version ready for approval. All feedback has been incorporated.',
+    status: 'pending_approval',
+    version: 3
+  }
+];
+```
+
+### 8. Comment Seeding
+```
+// Sample comments on drafts
+const comments = [
+  {
+    content: 'This looks great! Just a few minor suggestions for improvement.',
+    type: 'comment'
+  },
+  {
+    content: 'Please add more data to support the claims in paragraph 2.',
+    type: 'suggestion'
+  }
+];
+```
+
+### 9. Notification Seeding
+```
+// Sample notifications for users
+const notifications = [
+  {
+    type: 'post_scheduled',
+    title: 'Post Scheduled',
+    message: 'Your post has been scheduled for publication tomorrow at 9:00 AM.'
+  },
+  {
+    type: 'draft_comment',
+    title: 'New Comment',
+    message: 'Jane Editor has commented on your draft.'
+  }
+];
+```
+
+### 10. User Setting Seeding
+```
+// Sample user settings
+const userSettings = [
+  {
+    emailNotifications: true,
+    postReminders: true,
+    analyticsReports: true,
+    teamUpdates: true,
+    marketingEmails: false,
+    profileVisibility: 'team',
+    dataSharing: false,
+    analyticsTracking: true
+  }
+];
+```
+
+## Implementation Sequence
+
+To maintain referential integrity, the seeding will follow this sequence:
+
+```mermaid
+graph TD
+    A[Organizations] --> B[Users]
+    A --> C[Subscriptions]
+    B --> D[Posts]
+    A --> D
+    D --> E[Analytics]
+    B --> F[Team Members]
+    A --> F
+    B --> G[Drafts]
+    A --> G
+    G --> H[Comments]
+    B --> H
+    B --> I[Notifications]
+    B --> J[User Settings]
+```
+
+1. Organizations (no dependencies)
+2. Users (depends on Organizations)
+3. Subscriptions (depends on Organizations)
+4. Posts (depends on Users and Organizations)
+5. Analytics (depends on Posts)
+6. Team Members (depends on Users and Organizations)
+7. Drafts (depends on Users and Organizations)
+8. Comments (depends on Drafts and Users)
+9. Notifications (depends on Users)
+10. User Settings (depends on Users)
 
+## Data Consistency and Validation
 
+To ensure data consistency and validity, the seeding script will implement:
 
+1. **Data Validation**: All sample data will be validated against the Prisma schema constraints
+2. **Referential Integrity**: Foreign key relationships will be properly maintained
+3. **Unique Constraints**: Unique fields will be checked to prevent duplication
+4. **Data Consistency**: Related entities will have consistent data (e.g., timestamps, status transitions)
 
+## Error Handling
 
+The enhanced seeding script will include proper error handling:
 
+1. Try-catch blocks around each entity creation
+2. Graceful handling of existing data
+3. Informative error messages
+4. Proper cleanup on failure
 
+## Testing Strategy
 
+Unit tests will be implemented to verify:
 
+1. Data creation for each entity type
+2. Relationship establishment between entities
+3. Proper handling of existing data
+4. Error handling scenarios
 
+## Implementation Plan
 
+The enhanced seeding script will be implemented in the following phases:
 
+### Phase 1: Core Entities
+- Enhance Organization seeding with multiple sample organizations
+- Enhance User seeding with diverse user profiles
+- Implement Subscription seeding with different tiers
 
+### Phase 2: Content Entities
+- Implement Post seeding with various content types
+- Implement Analytics seeding with realistic metrics
+- Implement Draft seeding with different workflow states
 
+### Phase 3: Collaboration Entities
+- Implement Team Member seeding with various roles
+- Implement Comment seeding with different comment types
+- Implement Notification seeding with various notification types
 
+### Phase 4: User Preferences
+- Implement User Setting seeding with different preference combinations
 
+### Phase 5: Testing and Validation
+- Implement unit tests for each seeding function
+- Validate data relationships and integrity
+- Test error handling scenarios
 
+## Benefits
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+1. **Development Efficiency**: Developers will have realistic sample data to work with
+2. **Testing Coverage**: All entity types will be populated with sample data
+3. **Demo Capability**: Sales and product demos will have rich sample data
+4. **Integration Testing**: Complete data sets will enable comprehensive testing
