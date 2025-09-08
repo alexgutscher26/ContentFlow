@@ -7,7 +7,13 @@ const execPromise = promisify(exec);
 
 class MigrationService {
   /**
-   * Apply pending migrations
+   * Apply pending migrations to the database.
+   *
+   * This function first validates the migrations using migrationValidator.comprehensiveValidation. If validation fails, it returns an error message.
+   * If validation succeeds, it executes the Prisma migration command. It captures and logs any errors that occur during the migration process,
+   * returning a success status and details about the operation.
+   *
+   * @returns An object containing a success flag and details about the migration process.
    */
   async applyMigrations(): Promise<{ success: boolean; details: string }> {
     try {
@@ -39,7 +45,11 @@ class MigrationService {
   }
 
   /**
-   * Create a new migration
+   * Create a new migration.
+   *
+   * This function initiates the creation of a new migration using Prisma by executing a command with the provided name. It logs the process and captures any standard error output. If an error occurs during the execution, it logs the error and returns a failure response. Otherwise, it returns a success response with the output details.
+   *
+   * @param name - The name of the migration to be created.
    */
   async createMigration(name: string): Promise<{ success: boolean; details: string }> {
     try {
@@ -65,7 +75,9 @@ class MigrationService {
   }
 
   /**
-   * Reset database (use with caution)
+   * Resets the database using Prisma.
+   *
+   * This function executes a command to reset the database and handles the output and errors. It logs the process of resetting the database and returns an object indicating the success of the operation along with relevant details. If an error occurs during the execution, it captures and logs the error, providing feedback on the failure.
    */
   async resetDatabase(): Promise<{ success: boolean; details: string }> {
     try {
@@ -92,6 +104,11 @@ class MigrationService {
 
   /**
    * Get migration status
+   *
+   * This function retrieves the current migration status by executing the Prisma migrate status command.
+   * It logs the process and handles any errors that may occur during execution. If there is an error in
+   * the standard error output, it returns a failure response with the error details. Otherwise, it returns
+   * a success response with the migration status output.
    */
   async getMigrationStatus(): Promise<{ success: boolean; details: string }> {
     try {

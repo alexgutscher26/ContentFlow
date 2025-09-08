@@ -62,7 +62,9 @@ class BackupService {
   }
 
   /**
-   * Perform a full database backup
+   * Perform a full database backup.
+   *
+   * This function initiates a full backup of the database by executing a shell script. It logs the start of the backup process, captures the standard output and error from the script execution, and logs the results. If an error occurs during the backup, it logs the error and rethrows it for further handling.
    */
   async performFullBackup(): Promise<void> {
     try {
@@ -86,7 +88,9 @@ class BackupService {
   }
 
   /**
-   * Perform an incremental database backup
+   * Perform an incremental database backup.
+   *
+   * This function initiates an incremental backup of the database by executing a shell script. It logs the start of the backup process, captures the standard output and error from the script execution, and logs the results. If any errors occur during the backup, they are caught and logged, and the error is rethrown for further handling.
    */
   async performIncrementalBackup(): Promise<void> {
     try {
@@ -110,7 +114,11 @@ class BackupService {
   }
 
   /**
-   * Perform a transaction log backup
+   * Perform a transaction log backup.
+   *
+   * This function initiates a backup of the transaction log by executing a shell script located in the 'scripts' directory.
+   * It logs the start of the backup process, captures any standard error output, and logs the completion status.
+   * In case of an error during the execution, it logs the error and rethrows it for further handling.
    */
   async performTransactionLogBackup(): Promise<void> {
     try {
@@ -134,7 +142,11 @@ class BackupService {
   }
 
   /**
-   * Restore database from a backup file
+   * Restore database from a backup file.
+   *
+   * This function initiates the restoration of a database using a specified backup file. It executes a shell script located in the 'scripts' directory to perform the restore operation. The function logs the start of the process, captures any standard error output, and logs the completion status. In case of an error during execution, it logs the error and rethrows it for further handling.
+   *
+   * @param backupFilePath - The path to the backup file to restore the database from.
    */
   async restoreFromBackup(backupFilePath: string): Promise<void> {
     try {
@@ -158,14 +170,20 @@ class BackupService {
   }
 
   /**
-   * Get backup configuration
+   * Retrieves a copy of the backup configuration.
    */
   getConfig(): BackupConfig {
     return { ...this.config };
   }
 
   /**
-   * Validate backup integrity
+   * Validate backup integrity.
+   *
+   * This function checks the existence of a backup file by executing a command to list its details.
+   * It logs the validation process and the output. If the command fails, it catches the error, logs it,
+   * and returns false, indicating the backup validation was unsuccessful. Otherwise, it returns true.
+   *
+   * @param backupFilePath - The path to the backup file to be validated.
    */
   async validateBackup(backupFilePath: string): Promise<boolean> {
     try {

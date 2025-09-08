@@ -13,7 +13,12 @@ class MigrationValidator {
   }
 
   /**
-   * Validate migration files
+   * Validate migration files.
+   *
+   * This function checks the existence of the migration directory specified by `this.migrationDir`.
+   * If the directory exists, it executes a validation script to ensure the migrations are valid.
+   * It captures any standard error output and logs it, returning an appropriate validation result.
+   * In case of any exceptions during the process, it logs the error and returns a failure response.
    */
   async validateMigrations(): Promise<{ valid: boolean; details: string }> {
     try {
@@ -44,7 +49,9 @@ class MigrationValidator {
   }
 
   /**
-   * Test migrations in a temporary database
+   * Test migrations in a temporary database.
+   *
+   * This function executes a migration test script located in the specified migration directory. It logs the output and errors from the script execution. If any errors occur during the execution, they are captured and returned in the response. The function ensures that the migration test is validated and provides feedback on its success or failure.
    */
   async testMigrations(): Promise<{ success: boolean; details: string }> {
     try {
@@ -70,7 +77,11 @@ class MigrationValidator {
   }
 
   /**
-   * Check for potentially destructive changes
+   * Check for potentially destructive changes.
+   *
+   * This function executes a shell script to validate migration changes in the specified directory.
+   * It captures the output and checks for any warnings indicating potentially destructive operations.
+   * If any errors occur during execution, it logs the error and returns a failure message.
    */
   async checkDestructiveChanges(): Promise<{ hasDestructiveChanges: boolean; details: string }> {
     try {
@@ -102,7 +113,13 @@ class MigrationValidator {
   }
 
   /**
-   * Perform comprehensive migration validation
+   * Perform comprehensive migration validation.
+   *
+   * This function validates migration files and checks for any destructive changes.
+   * It first calls the validateMigrations method to ensure the files are valid.
+   * If the validation fails, it returns the validation result. If successful, it
+   * proceeds to check for destructive changes and returns a success message along
+   * with details of the destructive check.
    */
   async comprehensiveValidation(): Promise<{ valid: boolean; details: string }> {
     // First validate the migration files
