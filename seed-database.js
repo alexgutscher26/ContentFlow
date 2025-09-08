@@ -2,6 +2,14 @@ const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
+/**
+ * Main function to seed the database with initial data.
+ *
+ * This function orchestrates the execution of multiple seeding functions in a specific order to ensure referential integrity. It logs the start and completion of the seeding process, handles any errors that occur during the seeding, and ensures the database connection is properly closed afterward.
+ *
+ * @returns {Promise<void>} A promise that resolves when the seeding process is complete.
+ * @throws {Error} If any of the seeding functions fail, an error is logged and the process exits with a failure code.
+ */
 async function main() {
   try {
     console.log('Starting database seeding...');
@@ -28,6 +36,15 @@ async function main() {
 }
 
 // Individual seeding functions
+/**
+ * Seeds organizations into the database.
+ *
+ * This function logs the seeding process and iterates over a predefined list of organizations.
+ * For each organization, it checks if it already exists in the database using the prisma client.
+ * If the organization does not exist, it creates a new entry; otherwise, it logs that the organization already exists.
+ *
+ * @param {Object} prisma - The Prisma client instance used to interact with the database.
+ */
 async function seedOrganizations(prisma) {
   console.log('Seeding organizations...');
   
@@ -62,6 +79,15 @@ async function seedOrganizations(prisma) {
   }
 }
 
+/**
+ * Seed users into the database linked to existing organizations.
+ *
+ * This function retrieves all organizations from the database and checks if any exist.
+ * It then creates or updates user records based on predefined user data, linking them to the appropriate organization.
+ * If a user already exists, it updates their organizationId if not already linked.
+ *
+ * @param prisma - The Prisma client instance used to interact with the database.
+ */
 async function seedUsers(prisma) {
   console.log('Seeding users...');
   
@@ -140,6 +166,16 @@ async function seedUsers(prisma) {
   }
 }
 
+/**
+ * Seeds subscriptions for organizations in the database.
+ *
+ * This function retrieves all organizations from the database and checks if any exist.
+ * If organizations are found, it creates subscriptions for the first three organizations
+ * with predefined tiers and limits. It also checks for existing subscriptions to avoid
+ * duplicates before creating new ones.
+ *
+ * @param {Object} prisma - The Prisma client instance used for database operations.
+ */
 async function seedSubscriptions(prisma) {
   console.log('Seeding subscriptions...');
   
@@ -192,6 +228,14 @@ async function seedSubscriptions(prisma) {
   }
 }
 
+/**
+ * Seed posts into the database with predefined content.
+ *
+ * This function retrieves users and organizations from the database, checks if they exist, and then creates a set of posts linked to these users and organizations. It ensures that no duplicate posts with the same content for a user are created by checking for existing posts before insertion.
+ *
+ * @param prisma - The Prisma client instance used to interact with the database.
+ * @returns {Promise<void>} A promise that resolves when the seeding process is complete.
+ */
 async function seedPosts(prisma) {
   console.log('Seeding posts...');
   
@@ -254,6 +298,15 @@ async function seedPosts(prisma) {
   }
 }
 
+/**
+ * Seeds analytics data for existing posts in the database.
+ *
+ * This function retrieves posts from the database and checks if analytics data already exists for each post.
+ * If no posts are found, it logs a message and exits. For each post, it creates new analytics data if it
+ * does not already exist, logging the creation or existence of analytics accordingly.
+ *
+ * @param {Object} prisma - The Prisma client instance used to interact with the database.
+ */
 async function seedAnalytics(prisma) {
   console.log('Seeding analytics...');
   
@@ -312,6 +365,16 @@ async function seedAnalytics(prisma) {
   }
 }
 
+/**
+ * Seed team members by linking them to users and organizations.
+ *
+ * The function retrieves users and organizations from the database using Prisma.
+ * If either users or organizations are absent, it logs a message and exits.
+ * It then creates team members with predefined roles and statuses, checking for existing entries before creation.
+ *
+ * @param prisma - The Prisma client instance used to interact with the database.
+ * @returns {Promise<void>} A promise that resolves when the seeding process is complete.
+ */
 async function seedTeamMembers(prisma) {
   console.log('Seeding team members...');
   
@@ -365,6 +428,15 @@ async function seedTeamMembers(prisma) {
   }
 }
 
+/**
+ * Seed drafts into the database linked to users and organizations.
+ *
+ * This function retrieves users and organizations from the database using the prisma client.
+ * If either users or organizations are not found, it logs a message and exits.
+ * It then creates drafts with predefined content, checking for existing drafts to avoid duplicates.
+ *
+ * @param prisma - The Prisma client instance used to interact with the database.
+ */
 async function seedDrafts(prisma) {
   console.log('Seeding drafts...');
   
@@ -421,6 +493,16 @@ async function seedDrafts(prisma) {
   }
 }
 
+/**
+ * Seed comments for drafts linked to users in the database.
+ *
+ * This function retrieves drafts and users from the database using the prisma client.
+ * If either drafts or users are not found, it logs a message and exits. It then defines
+ * a set of comments to be created, checking for existing comments before creating new ones
+ * to avoid duplicates. Each comment is logged upon creation or if it already exists.
+ *
+ * @param prisma - The Prisma client instance used to interact with the database.
+ */
 async function seedComments(prisma) {
   console.log('Seeding comments...');
   
@@ -475,6 +557,15 @@ async function seedComments(prisma) {
   }
 }
 
+/**
+ * Seeds notifications for users in the database.
+ *
+ * This function retrieves all users from the database and checks if any exist. If no users are found, it logs a message and exits.
+ * It then creates a set of predefined notifications linked to the first three users. For each notification, it checks if a notification
+ * with the same title and userId already exists before creating a new one, logging the result of each operation.
+ *
+ * @param {Object} prisma - The Prisma client instance used to interact with the database.
+ */
 async function seedNotifications(prisma) {
   console.log('Seeding notifications...');
   
@@ -527,6 +618,15 @@ async function seedNotifications(prisma) {
   }
 }
 
+/**
+ * Seeds user settings for existing users in the database.
+ *
+ * This function retrieves all users from the database and checks if any user settings already exist for them.
+ * If no users are found, it logs a message and exits. For each user, it creates default settings if they do not
+ * already exist, logging the creation or existence of settings accordingly.
+ *
+ * @param {Object} prisma - The Prisma client instance used to interact with the database.
+ */
 async function seedUserSettings(prisma) {
   console.log('Seeding user settings...');
   
