@@ -3,6 +3,17 @@ import { getUserByEmail } from '@/lib/db/queries';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * Handles the POST request for user login.
+ *
+ * This function processes the incoming request, validates the required fields (email and password),
+ * retrieves the user from the database using getUserByEmail, and simulates successful authentication.
+ * If any errors occur during the process, it catches them and returns an appropriate error response.
+ *
+ * @param request - The NextRequest object containing the login request data.
+ * @returns A JSON response indicating success or failure of the login attempt.
+ * @throws Error If an unexpected error occurs during the login process.
+ */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
